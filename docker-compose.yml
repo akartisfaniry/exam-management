@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Base de données MariaDB
+  database:
+    image: mariadb:10.11
+    container_name: exam_database
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: exam_db
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: exam_user
+      MYSQL_PASSWORD: exam_password
+    ports:
+      - "49170:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - exam_network
+
+  # Backend Symfony
+  php-fpm:
+    build:
+      context: ./backend
+      dockerfile: .docker/php-fpm/Dockerfile
+    container_name: exam_backend
+    restart: unless-stopped
+    working_dir: /var/www
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/var/www
+    depends_on:
+      - database
+    networks:
+      - exam_network
+    environment:
+      - DATABASE_URL=mysql://exam_user:exam_password@database:3306/exam_db
+
+  # Nginx
+  api-webserver:
+    image: nginx:alpine
+    container_name: exam_webserver
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8400:80"
+    volumes:
+      - ./backend:/var/www
+      - ./backend/.docker/nginx:/etc/nginx/conf.d/
+    depends_on:
+      - php-fpm
+    networks:
+      - exam_network
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  exam_network:
+    driver: bridge
