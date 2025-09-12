@@ -31,7 +31,7 @@ COPY ../.. /var/www
 COPY --chown=www-data:www-data ../.. /var/www
 
 # Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --optimize-autoloader --no-scripts
 
 # Change current user to www
 USER www-data
