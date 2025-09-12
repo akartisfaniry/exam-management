@@ -54,6 +54,21 @@ services:
     networks:
       - exam_network
 
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: .docker/node/Dockerfile
+    container_name: exam_frontend_dev
+    restart: unless-stopped
+    ports:
+      - "8600:4200"
+    volumes:
+      - ./frontend:/app
+      - ./frontend/node_modules:/app/node_modules
+    networks:
+      - exam_network
+    environment:
+      - CHOKIDAR_USEPOLLING=true
 volumes:
   db_data:
     driver: local
