@@ -17,20 +17,22 @@
       </div>
 
       <!-- Formulaire -->
-      <form action="#" class="p-6 space-y-4">
+      <form [formGroup]="examForm" (ngSubmit)="onSubmit()" class="p-6 space-y-4">
         <!-- Messages d'erreur -->
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <p class="text-sm text-red-700">Veuillez corriger les erreurs du formulaire.</p>
+        @if (examService.error()) {
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-red-700">Veuillez corriger les erreurs du formulaire.</p>
+              </div>
             </div>
           </div>
-        </div>
+        }
 
         <!-- Nom de l'étudiant -->
         <div>
@@ -42,7 +44,13 @@
             type="text"
             formControlName="studentName"
             placeholder="Ex: Jean Dupont"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            [class.border-red-500]="isFieldInvalid('studentName')">
+          @if (backendErrors['studentName']) {
+            <p class="mt-1 text-sm text-red-600">
+              {{ backendErrors['studentName'] }}
+            </p>
+          }
         </div>
 
         <!-- Lieu -->
@@ -67,10 +75,13 @@
             id="date"
             type="date"
             formControlName="date"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 border-red-500">
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            [class.border-red-500]="isFieldInvalid('date')">
+          @if (backendErrors['date']) {
             <p class="mt-1 text-sm text-red-600">
-              La date doit être dans le futur
+              {{ backendErrors['date'] }}
             </p>
+          }
         </div>
 
         <!-- Heure -->
@@ -82,7 +93,13 @@
             id="time"
             type="time"
             formControlName="time"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            [class.border-red-500]="isFieldInvalid('time')">
+          @if (backendErrors['time']) {
+            <p class="mt-1 text-sm text-red-600">
+              {{ backendErrors['time'] }}
+            </p>
+          }
         </div>
 
         <!-- Statut -->
@@ -93,13 +110,19 @@
           <select
             id="status"
             formControlName="status"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            [class.border-red-500]="isFieldInvalid('status')">
             <option value="">Choisir un statut</option>
             <option value="Confirmé">Confirmé</option>
             <option value="À organiser">À organiser</option>
             <option value="En recherche de place">En recherche de place</option>
             <option value="Annulé">Annulé</option>
           </select>
+          @if (backendErrors['status']) {
+            <p class="mt-1 text-sm text-red-600">
+              {{ backendErrors['status'] }}
+            </p>
+          }
         </div>
 
         <!-- Boutons -->
@@ -112,8 +135,19 @@
           </button>
           <button
             type="submit"
+            [disabled]="examForm.invalid || examService.submitting()"
             class="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            @if (examService.submitting()) {
+              <div class="flex items-center justify-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Création...
+              </div>
+            } @else {
               Créer l'examen
+            }
           </button>
         </div>
       </form>
