@@ -1,14 +1,16 @@
-import {computed, Injectable, signal} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Exam, ExamStats} from '../models/exam';
 import {catchError, of, tap, throwError} from 'rxjs';
 import {HydraResponse} from '../models/hydra-response';
+import {AuthService} from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ExamService {
   private apiUrl = 'http://localhost:8400/api/exams';
+  authService = inject(AuthService);
 
   // Signals
   private examsSignal = signal<Exam[]>([]);
@@ -35,22 +37,15 @@ export class ExamService {
   });
 
   constructor(private http: HttpClient) {
+    if (this.authService.isAuthenticated()) {
       this.loadExams();
-  }
-
-  // definir l'entete de la requete
-  private getHttpHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Content-Type': 'application/ld+json',
-    });
+    }
   }
 
   loadExams() {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
-    this.http.get<HydraResponse<Exam>>(this.apiUrl, {
-      headers: this.getHttpHeaders()
-    })
+    this.http.get<HydraResponse<Exam>>(this.apiUrl)
       .pipe(
         tap(res => {
           this.examsSignal.set(res.items);
@@ -72,9 +67,7 @@ export class ExamService {
     this.submittingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.post<Exam>(this.apiUrl, exam, {
-      headers: this.getHttpHeaders()
-    })
+    return this.http.post<Exam>(this.apiUrl, exam)
       .pipe(
         tap(newExam => {
           this.examsSignal.update(exams => [...exams, newExam]);

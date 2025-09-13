@@ -2,13 +2,23 @@
   <nav class="bg-white shadow-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
-        <div class="flex items-center">
+        <div class="flex items-start flex-col justify-center">
           <h1 class="text-xl font-semibold text-gray-900">Exam Management</h1>
+          @if (authService.isAuthenticated()) {
+            <span class="text-xs font-normal"> Connecté en tant que <strong class="text-orange-600">{{ authService.currentUser()?.name }} ({{ authService.currentUser()?.email }})</strong></span>
+          }
         </div>
+        @if (authService.isAuthenticated()) {
+          <div class="flex items-center">
+            <button class="bg-red-500 hover:bg-red-600 text-white h-10 px-5 rounded-lg font-medium" (click)="logout()">
+              <i class="fa fa-right-from-bracket"></i> Se deconnecter
+            </button>
+          </div>
+        }
       </div>
     </div>
   </nav>
-  <main class="py-6">
+  <main>
     <router-outlet></router-outlet>
   </main>
 </div>
