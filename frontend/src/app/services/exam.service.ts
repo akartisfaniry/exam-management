@@ -57,7 +57,10 @@ export class ExamService {
           this.loadingSignal.set(false);
         }),
         catchError(error => {
-          this.errorSignal.set('Erreur lors du chargement des examens');
+          // Erreur client / parse JSON → on log seulement, pas d'affichage
+          if (error.status !== 0) {
+            this.errorSignal.set('Erreur lors du chargement des examens');
+          }
           this.loadingSignal.set(false);
           return throwError(() => error);
         })
