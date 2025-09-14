@@ -4,12 +4,13 @@ import {Exam, ExamStats} from '../models/exam';
 import {catchError, of, tap, throwError} from 'rxjs';
 import {HydraResponse} from '../models/hydra-response';
 import {AuthService} from './auth.service';
+import {Environment} from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ExamService {
-  private apiUrl = 'http://localhost:8400/api/exams';
+  private apiUrl = Environment.apiUrl + '/exams';
   authService = inject(AuthService);
 
   // Signals
