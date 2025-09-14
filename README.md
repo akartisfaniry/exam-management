@@ -146,8 +146,6 @@ export const Environment = {
 ```
 
 ## Améliorations possibles
-
-- [ ] **Modification d'examens** (réutilisation du composant `<exam-form>`)
 - [ ] **Filtres par statut** sur la liste
 - [ ] **Suppression d'examens**
 
