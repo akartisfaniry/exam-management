@@ -8,7 +8,7 @@
     <div>
 
       <button
-        class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium" (click)="showAddModal = true">
+        class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium" (click)="showModal = true">
         Organiser un examen
       </button>
     </div>
@@ -74,9 +74,15 @@
 
   <!-- Tableau des examens -->
   <div class="flex flex-col w-full justify-center space-y-5">
+    @if (!examService.loading() && examService.exams().length === 0) {
+      <div class="text-center py-8">
+        <p class="text-gray-600 text-lg">Aucun examen inscrit, veuillez en ajouter</p>
+      </div>
+
+    }
     @for (exam of examService.exams(); track exam.id) {
       <div class="border-4 py-5 rounded-2xl pr-40 pl-10 shadow-md hover:shadow-orange-500/50 hover:-translate-y-2
-              transition duration-300 ease-in-out">
+              transition duration-300 ease-in-out cursor-pointer" (click)="onExamClick(exam)">
         <div class="flex items-center">
           <div class="flex items-center space-x-8">
             <span class="font-normal flex items-center space-x-2 w-40"><i class="fa-regular fa-user"></i><strong>{{ exam.studentName }}</strong></span>
@@ -94,7 +100,8 @@
   </div>
 </div>
 <app-exam-form
-  [isOpen]="showAddModal"
-  (closeEvent)="showAddModal = false"
+  [isOpen]="showModal"
+  (closeEvent)="onCloseModal()"
+  [examToUpdate]="examSelected"
 >
 </app-exam-form>
