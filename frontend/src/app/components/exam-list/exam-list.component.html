@@ -1,0 +1,100 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <!-- Header avec bouton -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold">Mes examens</h1>
+      <span class="font-medium">{{ examService.stats().total }} examens à venir</span>
+    </div>
+    <div>
+
+      <button
+        class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium" (click)="showAddModal = true">
+        Organiser un examen
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="flex flex-col w-full rounded-2xl border-4 p-5 mb-5 gap-5">
+    <h2 class="font-bold text-2xl text-center"> Statistiques des examens</h2>
+    <div class="flex flex-row justify-between items-center gap-5">
+      <div class="border-4 rounded-2xl p-10 w-full pb-15 h-40">
+        <div class="flex flex-row items-center justify-between">
+          <div class="flex flex-col gap-3">
+            <span class="text-normal">Confirmé</span>
+            <span class="font-bold text-[green] text-3xl">{{ examService.stats().confirmed }}</span>
+          </div>
+          <i class="fa-regular fa-circle-check text-[green] font-bold text-3xl"></i>
+        </div>
+      </div>
+      <div class="border-4 rounded-2xl p-10 w-full pb-15 h-40">
+        <div class="flex flex-row items-center justify-between">
+          <div class="flex flex-col gap-3">
+            <span class="text-normal">À organiser</span>
+            <span class="font-bold text-[orange] text-3xl">{{ examService.stats().pending }}</span>
+          </div>
+          <i class="fa-solid fa-clipboard-list text-[orange] font-bold text-3xl"></i>
+        </div>
+      </div>
+      <div class="border-4 rounded-2xl p-10 w-full pb-15 h-40">
+        <div class="flex flex-row items-center justify-between">
+          <div class="flex flex-col gap-3">
+            <span class="text-normal">Annulé</span>
+            <span class="font-bold text-[red] text-3xl">{{ examService.stats().cancelled }}</span>
+          </div>
+          <i class="fa-solid fa-x text-[red] font-bold text-3xl"></i>
+        </div>
+      </div>
+      <div class="border-4 rounded-2xl p-10 w-full pb-15 h-40">
+        <div class="flex flex-row items-center justify-between">
+          <div class="flex flex-col gap-3">
+            <span class="text-normal">En recherche de place</span>
+            <span class="font-bold text-[blue] text-3xl">{{ examService.stats().searching }}</span>
+          </div>
+          <i class="fa-solid fa-clock text-[blue] font-bold text-3xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (examService.loading()) {
+    <div class="text-center py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
+      <p class="mt-2 text-gray-600">Chargement...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (examService.error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+      <p class="text-red-700">{{ examService.error() }}</p>
+    </div>
+  }
+
+  <!-- Tableau des examens -->
+  <div class="flex flex-col w-full justify-center space-y-5">
+    @for (exam of examService.exams(); track exam.id) {
+      <div class="border-4 py-5 rounded-2xl pr-40 pl-10 shadow-md hover:shadow-orange-500/50 hover:-translate-y-2
+              transition duration-300 ease-in-out">
+        <div class="flex items-center">
+          <div class="flex items-center space-x-8">
+            <span class="font-normal flex items-center space-x-2 w-40"><i class="fa-regular fa-user"></i><strong>{{ exam.studentName }}</strong></span>
+            <span class="font-normal flex items-center space-x-2 w-48" [ngClass]="{ 'italic text-[gray]': isStatusInSearchPlace(exam) }"><i class="fa-solid fa-location-dot mr-2"></i>{{ isStatusInSearchPlace(exam) ? 'En attente' : exam.location || '-' }}</span>
+            <span class="font-normal flex items-center space-x-2 w-40" [ngClass]="{ 'italic text-[gray]': isStatusInSearchPlace(exam) }"><i class="fa-regular fa-calendar-days mr-2"></i>{{ isStatusInSearchPlace(exam) ? 'En attente' : exam.date | date:'dd MMM':'':'fr' }}</span>
+            <span class="font-normal flex items-center space-x-2 w-40" [ngClass]="{ 'italic text-[gray]': isStatusInSearchPlace(exam) }"><i class="fa-regular fa-clock mr-2"></i>{{ isStatusInSearchPlace(exam) ? 'En attente' : exam.timeFormatted }}</span>
+          </div>
+          <div class="flex items-center space-x-2 ml-4">
+            <span class="font-normal w-lg rounded-lg text-center px-3 py-1" [class]="getBadgeClass(exam.status)"><i
+              class="mr-2" [class]="getIconClass(exam.status)"></i>{{ exam.status }}</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+<app-exam-form
+  [isOpen]="showAddModal"
+  (closeEvent)="showAddModal = false"
+>
+</app-exam-form>
