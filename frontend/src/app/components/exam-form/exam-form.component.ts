@@ -1,6 +1,8 @@
-import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnChanges, Output} from '@angular/core';
 import {ExamService} from '../../services/exam.service';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Exam} from '../../models/exam';
+import {formatDateForInput, formatTimeForInput} from '../../helpers/helpers';
 
 @Component({
   selector: 'app-exam-form',
@@ -11,8 +13,9 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
   templateUrl: './exam-form.component.html',
   styleUrl: './exam-form.component.scss'
 })
-export class ExamFormComponent {
+export class ExamFormComponent implements OnChanges{
   @Input() isOpen = false;
+  @Input() examToUpdate?: Exam | undefined;
   @Output() closeEvent = new EventEmitter<void>();
 
   examService = inject(ExamService);
@@ -23,12 +26,30 @@ export class ExamFormComponent {
 
   // Form group
   examForm: FormGroup = this.fb.group({
-    studentName: ['', Validators.required],
-    location: [''],
-    date: ['', Validators.required],
-    time: ['', Validators.required],
-    status: ['', Validators.required]
+    studentName: [this.examToUpdate ? this.examToUpdate?.studentName : '', Validators.required],
+    location: [this.examToUpdate ? this.examToUpdate?.location : '', Validators.required],
+    date: [this.examToUpdate ? this.examToUpdate?.date : '', Validators.required],
+    time: [this.examToUpdate ? this.examToUpdate?.time : '', Validators.required],
+    status: [this.examToUpdate ? this.examToUpdate?.status : '', Validators.required]
   });
+
+  ngOnChanges(): void {
+    if (this.examToUpdate) {
+      this.examForm.patchValue({
+        studentName: this.examToUpdate.studentName,
+        location: this.examToUpdate.location,
+        date: formatDateForInput(this.examToUpdate.date),
+        time: formatTimeForInput(this.examToUpdate.timeFormatted),
+        status: this.examToUpdate.status
+      });
+    } else {
+      this.examForm.reset();
+    }
+  }
+
+  get title(): string {
+    return this.examToUpdate ? 'Modifier l\'examen' : 'Ajouter un examen';
+  }
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.examForm.get(fieldName);
@@ -38,8 +59,11 @@ export class ExamFormComponent {
   onSubmit() {
     if (this.examForm.valid) {
       const examData = this.examForm.value;
+      const request$ = this.examToUpdate && this.examToUpdate.id
+        ? this.examService.updateExam(this.examToUpdate.id, examData)
+        : this.examService.addExam(examData);
 
-      this.examService.addExam(examData).subscribe({
+      request$.subscribe({
         next: () => {
           this.examForm.reset();
           this.backendErrors = {};

@@ -5,6 +5,7 @@ import {catchError, of, tap, throwError} from 'rxjs';
 import {HydraResponse} from '../models/hydra-response';
 import {AuthService} from './auth.service';
 import {Environment} from '../../environments/environment.development';
+import {handleValidationError} from '../helpers/helpers';
 
 @Injectable({
   providedIn: 'root'
@@ -74,17 +75,38 @@ export class ExamService {
           this.examsSignal.update(exams => [...exams, newExam]);
           this.submittingSignal.set(false);
         }),
-        catchError(error => {
-          if (error.status === 422 && error.error.violations) {
-            // On récupère les messages de Symfony (champ : message)
-            const messages = error.error.violations.map((v: any) => `${v.propertyPath}: ${v.message}`);
-            this.errorSignal.set(messages.join('\n'));
-          } else {
-            this.errorSignal.set('Erreur inattendue lors de l’ajout de l’examen');
-          }
+        catchError(error =>
+          handleValidationError(
+            error,
+            this.errorSignal,
+            this.submittingSignal,
+            'Erreur inattendue lors de l’ajout de l’examen'
+          )
+        )
+      );
+  }
+
+  updateExam(id: number, exam: Exam) {
+    this.submittingSignal.set(true);
+    this.errorSignal.set(null);
+
+    return this.http.put<Exam>(`${this.apiUrl}/${id}`, exam)
+      .pipe(
+        tap(updatedExam => {
+          // Remplace l'examen mis à jour dans la liste
+          this.examsSignal.update(exams =>
+            exams.map(e => e.id === updatedExam.id ? updatedExam : e)
+          );
           this.submittingSignal.set(false);
-          return throwError(() => error);
-        })
+        }),
+        catchError(error =>
+          handleValidationError(
+            error,
+            this.errorSignal,
+            this.submittingSignal,
+            'Erreur inattendue lors de la mise à jour de l’examen'
+          )
+        )
       );
   }
 

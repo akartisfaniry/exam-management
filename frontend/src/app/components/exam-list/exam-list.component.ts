@@ -14,7 +14,9 @@ import {Exam} from '../../models/exam';
 export class ExamListComponent {
   examService = inject(ExamService);
 
-  showAddModal = false;
+  showModal = false;
+
+  examSelected?: Exam | undefined;
 
   getBadgeClass(status: string): string {
     switch (status) {
@@ -48,5 +50,15 @@ export class ExamListComponent {
 
   isStatusInSearchPlace(exam: Exam): boolean {
     return exam.status === 'En recherche de place';
+  }
+
+  onExamClick(exam: Exam) {
+    this.examSelected = exam;
+    this.showModal = true;
+  }
+
+  onCloseModal() {
+    this.showModal = false;
+    this.examSelected = undefined;
   }
 }
