@@ -99,7 +99,7 @@ curl -X POST http://localhost:8400/api/exams \
 L'interface permet de :
 - Se connecter via la page de login **(admin@exam.com / password)**
 - Visualiser la liste des examens
-- Ajouter un nouvel examen
+- Ajouter/Modifier un nouvel examen
 
 ## Développement
 
