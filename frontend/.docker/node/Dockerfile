@@ -3,7 +3,7 @@ FROM node:20
 WORKDIR /app
 
 # install angular cli
-RUN npm install -g @angular/cli@16.2.11
+RUN npm install -g @angular/cli@18
 
 # Copy package files
 COPY package*.json ./
